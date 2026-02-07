@@ -2,127 +2,81 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>জন জাগরণ</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --primary: #1a237e; --accent: #ffd600; --bg: #f4f7f6; }
-    body { background: var(--bg); font-family: 'Hind Siliguri', sans-serif; color: #333; }
-    .nav-top { background: var(--primary); color: white; padding: 15px; text-align: center; font-weight: 700; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .card-custom { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; background: white; }
-    .btn-main { background: var(--primary); color: white; border-radius: 10px; font-weight: 600; padding: 12px; transition: 0.3s; }
-    .btn-main:active { transform: scale(0.95); }
-    .role-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 5px; background: #e8eaf6; color: var(--primary); font-weight: bold; }
+    :root { --p: #1a237e; --bg: #f8f9fa; }
+    body { background: var(--bg); font-family: sans-serif; }
+    .nav-bar { background: var(--p); color: white; padding: 15px; text-align: center; font-weight: bold; position: sticky; top: 0; z-index: 100; }
+    .card { border-radius: 12px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px; }
+    .btn-p { background: var(--p); color: white; width: 100%; border-radius: 8px; padding: 10px; font-weight: bold; }
   </style>
 </head>
 <body>
+  <div class="nav-bar">জন জাগরণ</div>
+  <div id="app" class="container mt-4">
+    <div class="text-center mt-5"><div class="spinner-border text-primary"></div></div>
+  </div>
 
-<div class="nav-top">জন জাগরণ কমান্ড সেন্টার</div>
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbyMq0W4jO0AHWJMiv5hINffkpge6BDsqaK0te6HN-pPpRLHaUnibYwd17XPoq12U_aqVg/execে";
+    let state = null;
 
-<div id="app" class="container mt-3 pb-5">
-    <div class="text-center py-5">
-        <div class="spinner-border text-primary"></div>
-        <p class="mt-2">সিস্টেম কানেক্ট হচ্ছে...</p>
-    </div>
-</div>
+    window.onload = () => {
+      if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+      const session = localStorage.getItem('jj_session');
+      if(session) { state = JSON.parse(session); renderDash(); } else { renderLogin(); }
+    };
 
-<script>
-// আপনার প্রদানকৃত স্ক্রিপ্ট লিঙ্ক (সংশোধিত)
-const API = "https://script.google.com/macros/s/AKfycbxRSnalmaRThnjdKDaeAIIn9vby6uNYtzzBADLj8cOANCVp1w9FsWSL5_4Kw078Jp1jAQ/exec";
-
-let state = { user: null, members: [], config: null };
-
-window.onload = () => {
-  const saved = localStorage.getItem('jj_session');
-  if(saved) { state = JSON.parse(saved); renderDashboard(); } else { renderLogin(); }
-};
-
-async function call(action, data = {}) {
-  try {
-    const res = await fetch(API, { method: 'POST', body: JSON.stringify({action, ...data}) });
-    return await res.json();
-  } catch (e) { alert("নেটওয়ার্ক ত্রুটি! আবার চেষ্টা করুন।"); return {status: 'error'}; }
-}
-
-function renderLogin() {
-  document.getElementById('app').innerHTML = `
-    <div class="card card-custom p-4 mt-5">
-      <h4 class="text-center mb-4 fw-bold" style="color: var(--primary)">স্বাগতম</h4>
-      <input id="ph" class="form-control mb-3" type="tel" placeholder="মোবাইল নম্বর">
-      <input id="ps" class="form-control mb-4" type="password" placeholder="পাসওয়ার্ড">
-      <button class="btn btn-main w-100" onclick="doLogin()">লগইন করুন</button>
-    </div>`;
-}
-
-async function doLogin() {
-  const ph = document.getElementById('ph').value;
-  const ps = document.getElementById('ps').value;
-  if(!ph || !ps) return alert("সব তথ্য দিন");
-  
-  const res = await call('login', { phone: ph, pass: ps });
-  if(res.status === 'success') {
-    state = res;
-    localStorage.setItem('jj_session', JSON.stringify(res));
-    renderDashboard();
-  } else alert(res.msg);
-}
-
-function renderDashboard() {
-  const u = state.user;
-  const news = (u.role === 'Admin' || u.role === 'Leader') ? state.config.newsLead : state.config.newsAll;
-
-  let html = `
-    <div class="card card-custom p-3 bg-white mb-4">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <strong>সর্বশেষ ঘোষণা</strong>
-        <button class="btn btn-sm btn-outline-primary" onclick="changePass()">পাসওয়ার্ড বদলান</button>
-      </div>
-      <p class="mb-0 text-primary fw-semibold">${news || 'নতুন কোনো আপডেট নেই'}</p>
-    </div>
-    
-    <div class="d-flex justify-content-between align-items-center px-1 mb-3">
-        <h6 class="mb-0 fw-bold">সদস্য তালিকা (${state.members.length})</h6>
-        ${(u.role === 'Admin' || u.role === 'Leader') ? `<button class="btn btn-dark btn-sm" onclick="alert('রেজিস্ট্রেশন ফিচার শীঘ্রই আসছে')">+ নতুন</button>` : ''}
-    </div>
-  `;
-
-  html += state.members.map(m => `
-    <div class="card card-custom p-3 mb-2">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="fw-bold">${m.name}</div>
-          <div class="text-muted small">${m.dist} | <span class="role-badge">${m.desig}</span></div>
-        </div>
-        <div class="d-flex gap-2">
-          <a href="tel:${m.phone}" class="btn btn-success btn-sm rounded-circle">📞</a>
-          ${(u.role === 'Admin' || u.role === 'Leader') ? `<button class="btn btn-light btn-sm border" onclick="editRole('${m.phone}')">⚙️</button>` : ''}
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  document.getElementById('app').innerHTML = html + `<button class="btn btn-outline-danger w-100 mt-4" onclick="logout()">লগআউট</button>`;
-}
-
-async function changePass() {
-    const newP = prompt("নতুন ৪ সংখ্যার পাসওয়ার্ড দিন:");
-    if(newP && newP.length >= 4) {
-        const res = await call('changePass', { phone: state.user.phone, newPass: newP });
-        alert(res.msg);
+    async function call(action, data = {}) {
+      const res = await fetch(API, { method: 'POST', body: JSON.stringify({action, ...data}) });
+      return await res.json();
     }
-}
 
-async function editRole(target) {
-    const newD = prompt("নতুন পদবী লিখুন (উদা: মন্ডল প্রমুখ):");
-    if(newD) {
-        const res = await call('updateRole', { targetPhone: target, newDesig: newD, adminPhone: state.user.phone });
-        alert(res.msg);
-        location.reload();
+    function renderLogin() {
+      document.getElementById('app').innerHTML = `
+        <div class="card p-4">
+          <h4 class="text-center mb-4">লগইন করুন</h4>
+          <input id="ph" class="form-control mb-3" type="tel" placeholder="মোবাইল নম্বর">
+          <input id="ps" class="form-control mb-4" type="password" placeholder="পাসওয়ার্ড">
+          <button class="btn btn-p" onclick="doLogin()">প্রবেশ করুন</button>
+        </div>`;
     }
-}
 
-function logout() { localStorage.clear(); location.reload(); }
-</script>
+    async function doLogin() {
+      const res = await call('login', { phone: document.getElementById('ph').value, pass: document.getElementById('ps').value });
+      if(res.status === 'success') {
+        state = res;
+        localStorage.setItem('jj_session', JSON.stringify(res));
+        renderDash();
+      } else alert(res.msg);
+    }
+
+    function renderDash() {
+      const u = state.user;
+      const news = (u.role === 'Admin' || u.role === 'Leader') ? state.config.nLead : state.config.nAll;
+      let html = `<div class="card p-3 bg-white mb-4"><strong>ঘোষণা:</strong><p class="text-primary mb-0">${news}</p></div>`;
+      html += state.members.map(m => `
+        <div class="card p-3">
+          <div class="d-flex justify-content-between">
+            <div><strong>${m.name}</strong><br><small>${m.dist} | ${m.desig}</small></div>
+            <div>
+              <a href="tel:${m.phone}" class="btn btn-success btn-sm">📞</a>
+              ${(u.role === 'Admin' || u.role === 'Leader') ? `<button class="btn btn-light btn-sm border ms-1" onclick="editR('${m.phone}')">⚙️</button>` : ''}
+            </div>
+          </div>
+        </div>`).join('');
+      document.getElementById('app').innerHTML = html + `<button class="btn btn-outline-danger w-100 mt-3" onclick="logout()">লগআউট</button>`;
+    }
+
+    async function editR(target) {
+      const nD = prompt("নতুন পদবী দিন:");
+      if(nD) { const r = await call('updateRole', { targetPhone: target, newDesig: nD, adminPhone: state.user.phone }); alert(r.msg); location.reload(); }
+    }
+
+    function logout() { localStorage.clear(); location.reload(); }
+  </script>
 </body>
 </html>
