@@ -1,11 +1,16 @@
 {
-  "name": "Jan Jagaran",
+  "name": "জন জাগরণ",
   "short_name": "JJ",
+  "description": "Organizational Management System",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#1a237e",
   "theme_color": "#1a237e",
   "icons": [
-    { "src": "https://cdn-icons-png.flaticon.com/512/1534/1534931.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1534/1534931.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
