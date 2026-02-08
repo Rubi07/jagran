@@ -1,8 +1,22 @@
-//const CACHE_NAME = 'jj-v1';
-//self.addEventListener('install', (e) => {
- // e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['index.html'])));
-});
-//self.addEventListener('fetch', (e) => {
- // e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+const CACHE_NAME = 'jj-cache-v1';
+const ASSETS_TO_CACHE = [
+  'index.html'
+];
+
+// ইন্সটল করার সময় ক্যাশ তৈরি করা
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
 });
 
+// নেটওয়ার্ক রিকোয়েস্ট হ্যান্ডেল করা
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});
