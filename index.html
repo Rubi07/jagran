@@ -25,7 +25,7 @@
     let state = null;
 
     window.onload = () => {
-      if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+      //if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
       const session = localStorage.getItem('jj_session');
       if(session) { state = JSON.parse(session); renderDash(); } else { renderLogin(); }
     };
@@ -80,5 +80,6 @@
   </script>
 </body>
 </html>
+
 
 
