@@ -30,14 +30,15 @@
 </div>
 
 <script>
-// আপনার নতুন এবং চূড়ান্ত API লিঙ্ক
+// আপনার প্রদানকৃত নির্ভুল API লিঙ্ক আমি এখানে বসিয়ে দিয়েছি
 const API = "https://script.google.com/macros/s/AKfycbwkQNXB1bQqVKtIR9ph_sIe1z-fQPbtgDrEJwMmVPo2vR-exy3N1VvPF1DKRWpa8ekW8Q/exec";
 
 let state = { user: null, members: [], config: null };
 
 window.onload = () => {
-  // সার্ভিস ওয়ার্কার রেজিস্টার করা
-  if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e => console.error(e)); }
+  if ('serviceWorker' in navigator) { 
+    navigator.serviceWorker.register('sw.js').catch(e => console.error("SW Error:", e)); 
+  }
   
   const saved = localStorage.getItem('jj_session');
   if(saved) { 
@@ -50,11 +51,14 @@ window.onload = () => {
 
 async function call(action, data = {}) {
   try {
-    const res = await fetch(API, { method: 'POST', body: JSON.stringify({action, ...data}) });
+    const res = await fetch(API, { 
+      method: 'POST', 
+      body: JSON.stringify({action, ...data}) 
+    });
     return await res.json();
   } catch (e) { 
-    console.error(e);
-    alert("নেটওয়ার্ক ত্রুটি! নিশ্চিত করুন আপনার ইন্টারনেট সচল আছে এবং গুগল স্ক্রিপ্ট 'Anyone' মুডে পাবলিশ করা হয়েছে।"); 
+    console.error("Fetch Error:", e);
+    alert("নেটওয়ার্ক ত্রুটি! নিশ্চিত করুন গুগল স্ক্রিপ্ট 'Anyone' মুডে আছে এবং ইন্টারনেট সচল।"); 
     return {status: 'error'}; 
   }
 }
